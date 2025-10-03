@@ -1,3 +1,21 @@
-# q2-wiki
-A community wiki for the QIDI Q2 3d printer
-Currently looking for stewards who own a Q2 to moderate and write content.
+# Qidi Community Q2 Wiki
+
+This is a summary collection of various config tweaks, print profiles, and links to various printable models that have been developed for improving the user experience of the Q2.
+
+## Official Qidi Wiki
+
+### [Qidi Q2 Wiki/Support Page](https://wiki.qidi3d.com/en/Q2)
+
+---
+
+## Issues and Possible Fixes
+
+### [Bed Tramming with Nylok Nuts](./content/bed-tramming/README.md)
+
+### [Randomizing Z Homing Probe Location](./content/randomize-probing/README.md)
+
+---
+
+## Printer Configuration Tweaks
+
+### [Displaying Toolhead and Host CPU in Temperature List](./content/temperature-monitoring/README.md)
