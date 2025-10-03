@@ -6,6 +6,10 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ### [Qidi Q2 Wiki/Support Page](https://wiki.qidi3d.com/en/Q2)
 
+## Additional Resources
+
+### [Qidi Q2 Tuning, Tweaks and Mods](https://github.com/bluedrool/Qidi-Q2-tuning-tweaks-and-mods)
+
 ---
 
 ## Issues and Possible Fixes
