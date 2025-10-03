@@ -16,6 +16,16 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ---
 
+## Software Installation
+
+### [Updating Debian Package Sources](./content/debian-package-sources/README.md)
+
+### [Updating and Fixing KIAUH](./content/kiauh-update-and-fix/README.md)
+
+### [Installing KlipperScreen](./content/klipperscreen-installation/README.md)
+
+---
+
 ## Printer Configuration Tweaks
 
 ### [Displaying Toolhead and Host CPU in Temperature List](./content/temperature-monitoring/README.md)
