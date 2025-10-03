@@ -22,6 +22,8 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ### [Updating and Fixing KIAUH](./content/kiauh-update-and-fix/README.md)
 
+### [Installing Spoolman](./content/spoolman-installation/README.md)
+
 ### [Installing KlipperScreen](./content/klipperscreen-installation/README.md)
 
 ---
