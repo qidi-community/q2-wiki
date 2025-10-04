@@ -16,14 +16,17 @@ Replace the stock display software with KlipperScreen for a native Klipper inter
 > First ensure KIAUH is properly updated and fixed by following the [Updating and Fixing KIAUH guide](../kiauh-update-and-fix/README.md).
 
 1. Unhold X11 packages:
+
    ```
    sudo apt-mark unhold xserver-common xserver-xorg-legacy
    ```
 
 2. Install KlipperScreen via KIAUH:
+
    ```
    ./kiauh/kiauh.sh
    ```
+
    Navigate through the menu to install KlipperScreen. Use all defaults except for the NetworkManager question.
 
    > [!NOTE]
@@ -60,11 +63,13 @@ EndSection
 ## Service Configuration
 
 Edit the KlipperScreen systemd service:
+
 ```
 sudo systemctl edit KlipperScreen
 ```
 
 Add this section under the first two commented lines:
+
 ```
 [Unit]
 ConditionPathExists=
@@ -73,11 +78,13 @@ ConditionPathExists=
 ## Starting KlipperScreen
 
 1. Stop the stock display software:
+
    ```
    sudo systemctl stop makerbase-client
    ```
 
 2. Start KlipperScreen:
+
    ```
    sudo systemctl restart KlipperScreen
    ```
@@ -96,15 +103,31 @@ Add these macros to your printer.cfg to enable load/unload buttons:
 description: filament unload
 gcode:
     M603
+# uncomment if using spoolman
+#    {action_call_remote_method(
+#      "spoolman_set_active_spool",
+#      spool_id=None
+#    )}
 
 [gcode_macro LOAD_FILAMENT]
 gcode:
+    RESPOND TYPE=command MSG="action:prompt_begin Pick temperature"
+    RESPOND TYPE=command MSG="action:prompt_button 220|LOAD_FILAMENT_WITH_TEMP S=220|primary"
+    RESPOND TYPE=command MSG="action:prompt_button 250|LOAD_FILAMENT_WITH_TEMP S=250|primary"
+    RESPOND TYPE=command MSG="action:prompt_button 270|LOAD_FILAMENT_WITH_TEMP S=270|primary"
+    RESPOND TYPE=command MSG="action:prompt_button 300|LOAD_FILAMENT_WITH_TEMP S=300|primary"
+    RESPOND TYPE=command MSG="action:prompt_show"
+
+[gcode_macro LOAD_FILAMENT_WITH_TEMP]
+gcode:
     {% set mode = params.T|default(0)|int %}
-    M604 T={mode}
+    {% set temp = params.S|default(250)|int %}
+
+    M604 T{mode} S{temp}
 
     RESPOND TYPE=command MSG="action:prompt_begin Loading successful?"
     RESPOND TYPE=command MSG="action:prompt_button Yes|RESPOND MSG='Done loading.'|primary"
-    RESPOND TYPE=command MSG="action:prompt_button No|LOAD_FILAMENT T=1|error"
+    RESPOND TYPE=command MSG="action:prompt_button No|LOAD_FILAMENT_WITH_TEMP T=1 S={temp}|error"
     RESPOND TYPE=command MSG="action:prompt_show"
 ```
 
@@ -116,6 +139,7 @@ gcode:
 Enable G-code switching between KlipperScreen and stock software:
 
 1. Run `sudo visudo` and add:
+
    ```
    ALL ALL=(ALL) NOPASSWD: /bin/systemctl start KlipperScreen, \
        /bin/systemctl stop KlipperScreen, \
@@ -125,6 +149,7 @@ Enable G-code switching between KlipperScreen and stock software:
    ```
 
 2. Add to your printer.cfg:
+
    ```ini
    [gcode_shell_command swap_screen]
    command: bash -c "if systemctl is-active --quiet KlipperScreen; then sudo systemctl stop KlipperScreen && sudo systemctl start makerbase-client; else sudo systemctl stop makerbase-client && sudo systemctl start KlipperScreen; fi"
@@ -143,6 +168,7 @@ Use `SWAP_SCREEN` in the console to switch interfaces. Takes ~5s to stock softwa
 To permanently switch back to the stock display software:
 
 1. Stop and disable KlipperScreen:
+
    ```
    sudo systemctl disable --now KlipperScreen
    ```
