@@ -52,3 +52,6 @@ Adjust each screw as indicated and repeat until all values are green.
 
 This video has all the instruction you need:
 https://www.youtube.com/watch?v=APAbl5PGEh0
+
+This video by Qidi will show you how to get the correct tension on the nuts (first minute):
+https://drive.google.com/file/d/1_EPVwa4XIsTpGCTIq4ZdUJT0OzW9BRJR/view
