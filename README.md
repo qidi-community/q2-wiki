@@ -14,6 +14,8 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ## Issues and Possible Fixes
 
+### [Bed Collision Fix](./content/bed-collision-fix/README.md)
+
 ### [Bed Tramming with Nylok Nuts](./content/bed-tramming/README.md)
 
 ### [Randomizing Z Homing Probe Location](./content/randomize-probing/README.md)
