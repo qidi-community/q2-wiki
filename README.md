@@ -18,6 +18,8 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ### [Bed Tramming with Nylok Nuts](./content/bed-tramming/README.md)
 
+### [Fixing PTFE Tube Filament Loading Issues](./content/ptfe-tube-filament-fix/README.md)
+
 ### [Randomizing Z Homing Probe Location](./content/randomize-probing/README.md)
 
 ---
