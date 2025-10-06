@@ -9,7 +9,7 @@ Add this `homing_override` to your printer.cfg:
 ```ini
 [homing_override]
 axes:xyz
-gcode: 
+gcode:
     {% set home_all = 'X' not in params and 'Y' not in params and 'Z' not in params %}              #
     {% set z_hop_speed = (printer.configfile.settings['stepper_z'].homing_speed * 60) | float %}    #
     {% set travel_speed = (printer.toolhead.max_velocity * 60) | float %}                           #
@@ -28,7 +28,7 @@ gcode:
 
                                                                                     #
 
-    {% if safe_y == -128 %}                                                                         # 
+    {% if safe_y == -128 %}                                                                         #
         {% set safe_y = (printer.configfile.settings.stepper_y.position_max) /2 %}                  # If safe_y is '-128', set safe_y to the center of the Y axis
     {% endif %}                                                                                     #
                                                                                   #
@@ -65,7 +65,7 @@ gcode:
         {% endif %}
         G0 X{safe_x} Y{safe_y} F{travel_speed}                                                     # Move to safe XY position at travel speed
     {% endif %}                                                                                     #
-   
+
     {% if home_all or 'Z' in params %}
         G90
         M106 S255  #Turn on part cooling fan to help cooldown nozzle
@@ -81,8 +81,8 @@ gcode:
         G28 Z
         G1 Z20 F2000
         SET_HEATER_TEMPERATURE HEATER=chamber TARGET={chamber}  #Restore chamber heater
-        
-    {% endif %} 
+
+    {% endif %}
 ```
 
 And add this macro for sensorless homing variables:
@@ -101,7 +101,7 @@ variable_safe_x: -128                       # Safe X position to home the Z axis
 variable_safe_y: -128                       # Safe Y position to home the Z axis, leave at -128 to home to the center of the Y axis.
 
 # Do not modify below
-gcode
+gcode:
 ```
 
 ## Installation
