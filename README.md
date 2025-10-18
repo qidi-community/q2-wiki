@@ -26,6 +26,8 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ## Software Installation
 
+### [Manually Downloading Updates](./content/manual-update-download/README.md)
+
 ### [Updating Debian Package Sources](./content/debian-package-sources/README.md)
 
 ### [Updating and Fixing KIAUH](./content/kiauh-update-and-fix/README.md)
