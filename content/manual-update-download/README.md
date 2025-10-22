@@ -29,6 +29,12 @@ Replace `1.0.8` with the current version number from the API response.
 
 1. Check the API for the current version number
 2. Download the zip file for that version
-3. Copy the zip file to a USB stick (do not extract)
-4. Insert the USB stick into the printer
-5. Select "Offline Update" from the printer menu to install
+3. Extract the zip file on your computer
+4. Find the extracted update folder (usually named something like "update" or with version number)
+5. Rename this folder to exactly "QD_Update"
+6. Copy the "QD_Update" folder to the root of your USB stick
+7. Insert the USB stick into the printer
+8. Select "Offline Update" from the printer menu to install
+
+> [!IMPORTANT]
+> The printer will only recognize the update if the folder is named exactly "QD_Update" (case-sensitive). Do not copy the original zip file to the USB - only the renamed folder.
