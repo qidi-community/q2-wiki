@@ -29,20 +29,25 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(echo "$INFO" | jq -r '.firmware.version')
+          DESCRIPTION=$(echo "$INFO" | jq -r '.firmware.description.en_US')
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "Failed to extract version from API response"
             exit 1
           fi
-
+          if [ -z "$DESCRIPTION" ] || [ "$DESCRIPTION" = "null" ]; then
+            DESCRIPTION="Firmware update for QIDI 3D printer"
+          fi
+          
           # Check if release already exists
-          if gh release view "v$VERSION" >/dev/null 2>&1; then
-            echo "Release v$VERSION already exists"
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists"
             echo "exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Release v$VERSION does not exist"
+            echo "Release $VERSION does not exist"
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_OUTPUT
 
       - name: Download firmware
         if: steps.check_release.outputs.exists == 'false'
@@ -60,8 +65,9 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          name: Firmware v${{ env.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          name: Firmware ${{ env.VERSION }}
+          body: ${{ env.DESCRIPTION }}
           files: firmware.zip
           draft: false
           prerelease: false
