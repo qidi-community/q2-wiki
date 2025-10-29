@@ -67,7 +67,7 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           name: Firmware ${{ env.VERSION }}
-          body: ${{ env.DESCRIPTION }}
+          body: ${{ steps.check_release.outputs.DESCRIPTION }}
           files: firmware.zip
           draft: false
           prerelease: false
