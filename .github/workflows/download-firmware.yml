@@ -1,0 +1,65 @@
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  download-firmware:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest available version
+        run: |
+          INFO=$(curl -s https://api.qidi3dprinter.com/code/x_q_2_version_info)
+          if [ -z "$INFO" ]; then
+            echo "Failed to fetch version info"
+            exit 1
+          fi
+          echo "INFO=$INFO" >> $GITHUB_ENV
+
+      - name: Check if release exists
+        id: check_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(echo "$INFO" | jq -r '.firmware.version')
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Failed to extract version from API response"
+            exit 1
+          fi
+
+          # Check if release already exists
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Release v$VERSION does not exist"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download firmware
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.check_release.outputs.VERSION }}"
+          echo "Downloading firmware version $VERSION"
+          wget "https://download_aws.qidi3dprinter.com/QD_Q2/Q2_$VERSION.zip" -o firmware.zip
+          if [ ! -f "firmware.zip" ]; then
+            echo "Failed to download firmware file"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Create release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Firmware v${{ env.VERSION }}
+          files: firmware.zip
+          draft: false
+          prerelease: false
