@@ -19,7 +19,9 @@ jobs:
             echo "Failed to fetch version info"
             exit 1
           fi
-          echo "INFO=$INFO" >> $GITHUB_ENV
+          # Sanitize JSON by removing tabs and newlines for environment variable
+          INFO_SANITIZED=$(echo "$INFO" | tr -d '\t\n\r')
+          echo "INFO=$INFO_SANITIZED" >> $GITHUB_ENV
 
       - name: Check if release exists
         id: check_release
