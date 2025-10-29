@@ -67,7 +67,14 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           name: Firmware ${{ env.VERSION }}
-          body: ${{ steps.check_release.outputs.DESCRIPTION }}
+          body: |
+            ${{ steps.check_release.outputs.DESCRIPTION }}
+            
+            ---
+            
+            **Note:** The firmware.zip file is the property of QIDI Tech. Copyright © 2025 QIDI Tech All Rights Reserved.
+            
+            This repository only automates the distribution of official firmware releases.
           files: firmware.zip
           draft: false
           prerelease: false
