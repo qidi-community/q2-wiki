@@ -54,7 +54,7 @@ jobs:
         run: |
           VERSION="${{ steps.check_release.outputs.VERSION }}"
           echo "Downloading firmware version $VERSION"
-          wget "https://download_aws.qidi3dprinter.com/QD_Q2/Q2_$VERSION.zip" -o firmware.zip
+          wget "https://download_aws.qidi3dprinter.com/QD_Q2/Q2_$VERSION.zip" -O firmware.zip
           if [ ! -f "firmware.zip" ]; then
             echo "Failed to download firmware file"
             exit 1
