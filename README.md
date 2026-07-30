@@ -12,6 +12,14 @@ This is a summary collection of various config tweaks, print profiles, and links
 
 ---
 
+## Getting Started
+
+### [Connecting to Your Printer via SSH](./content/ssh-guide/README.md)
+
+### [Getting Started with the Qidi Q2 / Q2C](./content/getting-started/README.md)
+
+---
+
 ## Issues and Possible Fixes
 
 ### [Bed Collision Fix](./content/bed-collision-fix/README.md)
@@ -23,6 +31,8 @@ This is a summary collection of various config tweaks, print profiles, and links
 ### [Randomizing Z Homing Probe Location](./content/randomize-probing/README.md)
 
 ### [Fixing lead screw rotation resistance](./content/lead-screw-resistance-fix/README.md)
+
+### [PLR Z-Offset Bug Fix](./content/plr-z-offset/README.md)
 
 ---
 
