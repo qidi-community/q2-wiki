@@ -9,8 +9,8 @@ Edit `/etc/apt/sources.list` and replace the contents with:
 ```
 deb http://archive.debian.org/debian bullseye main contrib
 deb-src http://archive.debian.org/debian bullseye main contrib
-deb http://deb.debian.org/debian-security bullseye-security main contrib
-deb-src http://deb.debian.org/debian-security bullseye-security main contrib
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb-src http://security.debian.org/debian-security bullseye-security main contrib
 deb http://archive.debian.org/debian bullseye-updates main contrib
 deb-src http://archive.debian.org/debian bullseye-updates main contrib
 deb http://archive.debian.org/debian bullseye-backports main contrib
