@@ -17,6 +17,7 @@ jobs:
       - name: Get latest available firmware
         id: firmware
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QIDI_DEVICE_ID: ${{ secrets.QIDI_DEVICE_ID }}
         run: |
           set -euo pipefail
@@ -32,20 +33,31 @@ jobs:
             exit 1
           fi
 
+          # The API only answers for a plausible currentVersion, so report the
+          # newest release already mirrored here.
+          CURRENT_VERSION=$(gh release list --limit 100 --json tagName --jq '.[].tagName' |
+            sed -n 's/^V\([0-9][0-9]*\(\.[0-9][0-9]*\)*\)$/\1/p' |
+            sort -V | tail -n 1)
+          CURRENT_VERSION=${CURRENT_VERSION:-01.01.02.04}
+          echo "Requesting update from version $CURRENT_VERSION"
+
           # Update request signing reverse-engineered by @thelegendtubaguy:
           # https://github.com/thelegendtubaguy/QidiMax4CommunityWiki/blob/main/docs/qidi_client_firmware_update_flow.md
-          CURRENT_VERSION="01.01.01.01"
+          # X-Version is the client API profile, not the firmware version.
           TIMESTAMP=$(date +%s%3N)
           NONCE=$(openssl rand -hex 16)
           SIGNATURE=$(printf '%s' 'qidi3d null' |
             openssl dgst -sha256 -hmac 'qid3d-from-2025-CAFE-BABE' |
             sed 's/^.* //')
 
-          RESPONSE=$(curl --fail-with-body --silent --show-error --get \
+          RESPONSE_FILE=$(mktemp)
+          HTTP_STATUS=$(curl --silent --show-error --get \
+            --output "$RESPONSE_FILE" --write-out '%{http_code}' \
             'https://api.qidimaker.com/backend/v1/fireware/upgrade-info' \
             --data-urlencode 'hardware=QD_Q2' \
             --data-urlencode "currentVersion=$CURRENT_VERSION" \
             --data-urlencode "deviceId=$DEVICE_ID" \
+            -H 'User-Agent: xindi/4.4.23' \
             -H 'Accept: */*' \
             -H 'Accept-Language: en_US' \
             -H 'Content-Type: application/json' \
@@ -57,17 +69,29 @@ jobs:
             -H "X-Signature: $SIGNATURE" \
             -H "X-Timestamp: $TIMESTAMP" \
             -H 'X-Timezone: +00:00' \
-            -H "X-Version: $CURRENT_VERSION")
+            -H 'X-Version: 01.01')
+          RESPONSE=$(cat "$RESPONSE_FILE")
 
-          if ! jq -e '.code == 200 and .data.version and .data.url' <<<"$RESPONSE" >/dev/null; then
-            jq . <<<"$RESPONSE" >&2
+          if [[ "$HTTP_STATUS" != 200 ]] || ! jq -e '.code == 200' <<<"$RESPONSE" >/dev/null 2>&1; then
+            echo "Update API request failed with HTTP $HTTP_STATUS:" >&2
+            jq . <<<"$RESPONSE" >&2 2>/dev/null || printf '%s\n' "$RESPONSE" >&2
             exit 1
+          fi
+
+          if ! jq -e '.data.needUpdate != false and .data.version and .data.url' <<<"$RESPONSE" >/dev/null; then
+            echo "No firmware newer than $CURRENT_VERSION is available."
+            jq -c . <<<"$RESPONSE"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
           VERSION=$(jq -r '.data.version | ltrimstr("V")' <<<"$RESPONSE")
           DOWNLOAD_URL=$(jq -r '.data.url' <<<"$RESPONSE")
-          DESCRIPTION=$(jq -r '.data.description // "Firmware update for QIDI Q2"' <<<"$RESPONSE")
+          # The API currently returns a placeholder URL here, so only keep real text.
+          DESCRIPTION=$(jq -r '.data.description // "" | select(test("^\\s*https?://") | not)' <<<"$RESPONSE")
+          DESCRIPTION=${DESCRIPTION:-Firmware update for QIDI Q2}
           {
+            echo "available=true"
             echo "version=$VERSION"
             echo "tag=V$VERSION"
             echo "download_url=$DOWNLOAD_URL"
@@ -77,6 +101,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Check if release exists
+        if: steps.firmware.outputs.available == 'true'
         id: release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,18 +136,20 @@ jobs:
           fi
 
           ARCHIVE_FILES=$(unzip -Z1 firmware.zip)
+          MANIFEST_FILES=$(jq -er 'to_entries[] | select(.value | type == "object")
+            | .value.file // error("manifest component \(.key) has no file")' firmware_manifest.json)
           while IFS= read -r component_file; do
             if ! grep -Fqx "$component_file" <<<"$ARCHIVE_FILES"; then
               echo "Firmware bundle is missing manifest file $component_file." >&2
               exit 1
             fi
-          done < <(jq -er '.SOC.file, .MCU.file, .THR.file, .BOX.file' firmware_manifest.json)
+          done <<<"$MANIFEST_FILES"
 
           {
-            echo "soc_version=$SOC_VERSION"
-            echo "mcu_version=$(jq -er '.MCU.version' firmware_manifest.json)"
-            echo "thr_version=$(jq -er '.THR.version' firmware_manifest.json)"
-            echo "box_version=$(jq -er '.BOX.version' firmware_manifest.json)"
+            echo "components<<__EOF__"
+            jq -er 'to_entries[] | select(.value | type == "object")
+              | "| \(.key) | \(.value.version // "unknown") |"' firmware_manifest.json
+            echo "__EOF__"
             echo "sha256=$(sha256sum firmware.zip | cut -d' ' -f1)"
           } >> "$GITHUB_OUTPUT"
 
@@ -137,12 +164,11 @@ jobs:
 
             | Component | Version |
             | --- | --- |
-            | SOC | ${{ steps.bundle.outputs.soc_version }} |
-            | MCU | ${{ steps.bundle.outputs.mcu_version }} |
-            | THR | ${{ steps.bundle.outputs.thr_version }} |
-            | BOX | ${{ steps.bundle.outputs.box_version }} |
+            ${{ steps.bundle.outputs.components }}
 
             Source: ${{ steps.firmware.outputs.download_url }}
+
+            Release notes: https://wiki.qidi3d.com/en/Q2/firmware-release-history
 
             SHA-256: `${{ steps.bundle.outputs.sha256 }}`
 
